@@ -3,12 +3,7 @@ title: "PA1_template.Rmd"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(plyr)
-library(dplyr)
-library(lattice)
-```
+
 
 ## Introduction
 
@@ -22,7 +17,8 @@ The variables included in this dataset are:
 
 **Loading and preprocessing the data**
 
-```{r data}
+
+```r
 ## Reading basedata
 data <- read.csv("activity.csv")
 
@@ -37,29 +33,52 @@ datainterval <- ddply(data,.(interval),summarize,Avg.Steps=mean(steps,na.rm = TR
 
 *Histogram of the total number of steps taken each day*
 
-```{r 2}
+
+```r
 hist(datadate$Total.Steps, breaks = 10,main = "Total Steps per day", xlab = "Steps",col="blue")
 ```
 
+![plot of chunk 2](figure/2-1.png)
+
 *Mean and median number of steps taken each day*
 
-```{r 3}
+
+```r
 mean(datadate$Total.Steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(datadate$Total.Steps,na.rm = TRUE)
+```
+
+```
+## [1] 10765
 ```
 
 **What is the average daily activity pattern?**
 
 *Time series plot of the 5-minute interval and the average number of steps taken, averaged across all days*
 
-```{r 4}
+
+```r
 plot(Avg.Steps~interval,data=datainterval,type="l",xlab = "5-minute interval", ylab = "average number of steps taken", main = "Average Daily Activity Pattern", col = "blue")
 ```
 
+![plot of chunk 4](figure/4-1.png)
+
 *The 5-minute interval that, on average, contains the maximum number of steps*
 
-```{r 5}
+
+```r
 datainterval[which.max(datainterval$Avg.Steps),1]
+```
+
+```
+## [1] 835
 ```
 
 **Imputing missing values**
@@ -68,8 +87,13 @@ datainterval[which.max(datainterval$Avg.Steps),1]
 
 - total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
-```{r 6}
+
+```r
 sum(is.na(data$steps))
+```
+
+```
+## [1] 2304
 ```
 
 *Strategy for filling in all of the missing values in the dataset : the mean for that 5-minute interval*
@@ -77,7 +101,8 @@ sum(is.na(data$steps))
 - Creation of new dataset that is equal to the original dataset but with the missing data filled in
 
 
-```{r 7}
+
+```r
 dataimput <- data
 for (i in 1:nrow(dataimput)){
         if(is.na(dataimput[i,1])==TRUE){
@@ -85,17 +110,40 @@ for (i in 1:nrow(dataimput)){
         }
 }
 sum(is.na(dataimput$steps))
+```
 
+```
+## [1] 0
+```
+
+```r
 ## Aggregating Total Steps by date
 datadate2 <- ddply(dataimput,.(date),summarize,Total.Steps=sum(steps))
 ```
 
 *Histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.*
 
-```{r 8}
+
+```r
 hist(datadate2$Total.Steps,breaks = 10,main = "Total Steps per day", xlab = "Steps",col="blue")
+```
+
+![plot of chunk 8](figure/8-1.png)
+
+```r
 mean(datadate2$Total.Steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 median(datadate2$Total.Steps,na.rm = TRUE)
+```
+
+```
+## [1] 10766.19
 ```
 
 *Mean & Median comparision from the estimates from the first part of the assignment*
@@ -108,7 +156,8 @@ median(datadate2$Total.Steps,na.rm = TRUE)
 
 *Created a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.*
 
-```{r 9}
+
+```r
 dataimputnew <- dataimput
 dataimputnew$date <- as.Date(dataimputnew$date)
 dataimputnew <- mutate(dataimputnew,day=ifelse(weekdays(date) %in% c("Sunday","Saturday"),"weekend","weekday"))
@@ -116,12 +165,15 @@ dataimputnew <- mutate(dataimputnew,day=ifelse(weekdays(date) %in% c("Sunday","S
 
 *Panel plot containing a time series plot of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis).*
 
-```{r 10}
+
+```r
 ## Aggregating Average Steps by Interval & Weekday/Weekend
 
 dataimputnewinterval <- ddply(dataimputnew,.(interval,day),summarize,Avg.Steps=mean(steps,na.rm = TRUE))
 
 xyplot(Avg.Steps ~ interval | day, data=dataimputnewinterval, type="l", layout=c(1,2), grid=TRUE,ylab="Avg. Number of steps", xlab="5-min. intervals", main="Average  5-min. activity intervals: Weekdays vs. Weekends")
 ```
+
+![plot of chunk 10](figure/10-1.png)
 
 *During Weekdays number of steps peaks towards morning time (8AM - 10 AM) and is relatively less post that. However during weekend, number of steps concentrated & spreads uniformly between 8AM to 8 PM*
